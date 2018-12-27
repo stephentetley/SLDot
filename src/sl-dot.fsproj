@@ -7,8 +7,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ff5643f4-4b94-47f6-a77a-0dd4bd5852fb</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>sl_dot</RootNamespace>
-    <AssemblyName>sl_dot</AssemblyName>
+    <RootNamespace>SLDot</RootNamespace>
+    <AssemblyName>SLDot</AssemblyName>
     <UseStandardResourceNames>true</UseStandardResourceNames>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -42,6 +42,8 @@
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
     <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="SLDot/Internal/PrettyPrint.fs" />
+    <Compile Include="SLDot\Internal\DotPrint.fs" />
     <Compile Include="SLDot/DotOutput.fs" />
     <Content Include="packages.config" />
   </ItemGroup>

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Stephen Tetley 2018
 // License: BSD 3 Clause
 
+#load "../src/SLDot/Internal/PrettyPrint.fs"
+#load "../src/SLDot/Internal/DotPrint.fs"
 #load "../src/SLDot/DotOutput.fs"
 open SLDot.DotOutput
 

@@ -8,11 +8,11 @@
 // to work well in F#.
 
 
-namespace SLDot.Internal
+namespace SLDot.Internal.PrettyPrint
 
 
 
-[<RequireQualifiedAccess>]
+[<AutoOpen>]
 module PrettyPrint = 
 
     open System.Text
