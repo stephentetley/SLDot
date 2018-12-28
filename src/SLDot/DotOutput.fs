@@ -6,6 +6,10 @@ module SLDot.DotOutput
 
 open System.IO
 
+open SLDot.Internal.DotPrint
+
+type Attribute = SLDot.Internal.DotPrint.Attribute
+
 // Graphviz Monad
 // Output is to a handle so this is not really a writer monad
 // (all output must be sequential)
@@ -139,9 +143,7 @@ let nested (initial:string) (body:GraphvizOutput<'a>) : GraphvizOutput<'a> =
 
 type ValueRep = QUOTED | UNQUOTED
 
-type Attribute =
-    | Unquoted of string * string
-    | Quoted of string * string
+
 
 let showAttribute (attr:Attribute) : string = 
     match attr with
