@@ -6,9 +6,11 @@ module SLDot.DotOutput
 
 open System.IO
 
+open SLDot.Internal
 open SLDot.Internal.DotPrint
 
 type Attribute = SLDot.Internal.DotPrint.Attribute
+type private Doc = PrettyPrint.Doc
 
 // Graphviz Monad
 // Output is to a handle so this is not really a writer monad
@@ -24,16 +26,16 @@ type Config =
       EdgeOp: string }
 
 type GraphvizOutput<'a> = 
-    GraphvizOutput of (Config -> StringWriter -> 'a)
+    GraphvizOutput of (Config -> WriterDoc -> (WriterDoc * 'a))
 
-let inline private apply1 (ma : GraphvizOutput<'a>) (config:Config)  (handle:StringWriter) : 'a = 
-    let (GraphvizOutput f) = ma in f config handle
+let inline private apply1 (ma : GraphvizOutput<'a>) (config:Config)  (acc:WriterDoc) : (WriterDoc * 'a) = 
+    let (GraphvizOutput f) = ma in f config acc
 
-let inline private returnM (x:'a) : GraphvizOutput<'a> = GraphvizOutput (fun _ _ -> x)
+let inline private returnM (x:'a) : GraphvizOutput<'a> = GraphvizOutput (fun _ acc -> (acc,x))
 
 
 let inline private bindM (ma:GraphvizOutput<'a>) (f : 'a -> GraphvizOutput<'b>) : GraphvizOutput<'b> =
-    GraphvizOutput (fun r sw -> let a = apply1 ma r sw in apply1 (f a) r sw)
+    GraphvizOutput (fun r acc -> let (acc2,a) = apply1 ma r acc in apply1 (f a) r acc2)
 
 let fail : GraphvizOutput<'a> = GraphvizOutput (fun _ _ -> failwith "GraphvizOutput fail")
 
@@ -48,8 +50,8 @@ let (graphvizOutput:GraphvizOutputBuilder) = new GraphvizOutputBuilder()
 
 // Common monadic operations
 let fmapM (fn:'a -> 'b) (ma:GraphvizOutput<'a>) : GraphvizOutput<'b> = 
-    GraphvizOutput <| fun (config:Config) (sw:StringWriter) ->
-        let ans = apply1 ma config sw in fn ans
+    GraphvizOutput <| fun (config:Config) (acc:WriterDoc) ->
+        let (acc2,ans) = apply1 ma config acc in (acc2, fn ans)
 
 let mapM (fn:'a -> GraphvizOutput<'b>) (xs:'a list) : GraphvizOutput<'b list> = 
     let rec work ac ys = 
@@ -69,26 +71,25 @@ let mapMz (fn:'a -> GraphvizOutput<'b>) (xs:'a list) : GraphvizOutput<unit> =
 
 let forMz (xs:'a list) (fn:'a -> GraphvizOutput<'b>) : GraphvizOutput<unit> = mapMz fn xs
 
-let traverseM (fn: 'a -> GraphvizOutput<'b>) (source:seq<'a>) : GraphvizOutput<seq<'b>> = 
-    GraphvizOutput <| fun handle indent ->
-        Seq.map (fun x -> let mf = fn x in apply1 mf handle indent) source
+//let traverseM (fn: 'a -> GraphvizOutput<'b>) (source:seq<'a>) : GraphvizOutput<seq<'b>> = 
+//    GraphvizOutput <| fun config acc ->
+//        Seq.map (fun x -> let mf = fn x in apply1 mf handle indent) source
 
-// Need to be strict - hence use a fold
-let traverseMz (fn: 'a -> GraphvizOutput<'b>) (source:seq<'a>) : GraphvizOutput<unit> = 
-    GraphvizOutput <| fun handle indent ->
-        Seq.fold (fun ac x -> 
-                    let ans  = apply1 (fn x) handle indent in ac) 
-                 () 
-                 source 
+//// Need to be strict - hence use a fold
+//let traverseMz (fn: 'a -> GraphvizOutput<'b>) (source:seq<'a>) : GraphvizOutput<unit> = 
+//    GraphvizOutput <| fun handle indent ->
+//        Seq.fold (fun ac x -> 
+//                    let ans  = apply1 (fn x) handle indent in ac) 
+//                 () 
+//                 source 
 
 // GraphvizOutput-specific operations
 
 let runGraphvizOutput (ma:GraphvizOutput<'a>) : (string * 'a) = 
-    use handle : System.IO.StringWriter = new System.IO.StringWriter()
     match ma with 
     | GraphvizOutput(f) -> 
-        let ans = f { Indent=0; EdgeOp="->" } handle
-        let text = handle.ToString()
+        let (acc,ans) =  f { Indent=0; EdgeOp="->" } wempty
+        let text = acc.Render ()
         (text,ans)
 
 let execGraphvizOutput (ma:GraphvizOutput<'a>) : string = fst <| runGraphvizOutput ma
@@ -105,44 +106,36 @@ let runGraphvizOutputConsole (ma:GraphvizOutput<'a>) : 'a =
 
 /// This is too low level to expose.
 let private askConfig : GraphvizOutput<Config> = 
-    GraphvizOutput <| fun config _ -> config
+    GraphvizOutput <| fun config acc -> (acc,config)
 
 /// This is too low level to expose.
 let private asksConfig (extract:Config -> 'a) : GraphvizOutput<'a> = 
-    GraphvizOutput <| fun config _ -> extract config
+    GraphvizOutput <| fun config acc -> (acc, extract config)
 
 /// This is too low level to expose.
 let private local (project:Config -> Config) (ma:GraphvizOutput<'a>) : GraphvizOutput<'a> = 
     GraphvizOutput <| fun config sw -> apply1 ma (project config) sw
         
 /// This is too low level to expose.
-let private tellLine (line:string) : GraphvizOutput<unit> = 
-    GraphvizOutput <| fun config sw -> 
-        let prefix = String.replicate config.Indent " "
-        sw.WriteLine (sprintf "%s%s" prefix line )
+let private tellDoc (doc:Doc) : GraphvizOutput<unit> = 
+    GraphvizOutput <| fun config acc -> 
+        (acc.Tell(doc), ())
 
 /// Same as tellLine but the string is suffixed with ";".
-let tellStatement (line:string) : GraphvizOutput<unit> = tellLine <| sprintf "%s;" line
+let private tellStatement (line:Doc) : GraphvizOutput<unit> = 
+    tellDoc <| PrettyPrint.beside line (PrettyPrint.character ';')
 
-let indent (body:GraphvizOutput<'a>) : GraphvizOutput<'a> = 
-    GraphvizOutput <| fun config sw -> 
-        let indent = config.Indent
-        apply1 body { config with Indent=indent+4 } sw
+//let indent (body:GraphvizOutput<'a>) : GraphvizOutput<'a> = 
+//    GraphvizOutput <| fun config sw -> 
+//        let indent = config.Indent
+//        apply1 body { config with Indent=indent+4 } sw
 
 
 let nested (initial:string) (body:GraphvizOutput<'a>) : GraphvizOutput<'a> =
-    let line1 = 
-        match initial with 
-        | "" -> "{"
-        | _ -> sprintf "%s {" initial
-    graphvizOutput {
-        do! tellLine line1
-        let! ans = indent body
-        do! tellLine "}"
-        return ans }
-
-type ValueRep = QUOTED | UNQUOTED
-
+    GraphvizOutput <| fun config acc -> 
+        let (body1, ans) = apply1 body config wempty
+        let acc2 = acc.PrefixNest (PrettyPrint.text initial) body1
+        (acc2, ans)
 
 
 let showAttribute (attr:Attribute) : string = 
@@ -155,8 +148,7 @@ let showAttributeList (attrs:Attribute list) =
 
 
 let lineComment (text:string) : GraphvizOutput<unit> =
-    let lines = text.Split [|'\n'|] |> Array.toList
-    forMz lines <| (tellLine << sprintf "// %s")
+    tellDoc <| lineCommentDoc text
 
 let graph (name:string) (body:GraphvizOutput<'a>) : GraphvizOutput<'a> =
     local (fun x -> {x with EdgeOp="--"}) <| nested (sprintf "graph %s" name) body
@@ -172,33 +164,28 @@ let anonSubgraph (body:GraphvizOutput<'a>) : GraphvizOutput<'a> = nested "" body
 
 /// cat should be one of "graph", "node","edge"
 let attrStmt (cat:string) (attrs:Attribute list) : GraphvizOutput<unit> =
-    tellStatement <| sprintf "%s %s" cat (showAttributeList attrs)
+    tellStatement <| attribStmtDoc cat attrs
 
 let attrib (attr:Attribute) : GraphvizOutput<unit> = 
-    tellStatement <| showAttribute attr
+    tellStatement <| attr.Body
 
 
 
-let node (id:string) (attrs:Attribute list) : GraphvizOutput<unit> =
-    match attrs with
-    | [] -> tellStatement id
-    |_ -> tellStatement <| sprintf "%s %s" id (showAttributeList attrs)
+let node (nodeId:string) (attrs:Attribute list) : GraphvizOutput<unit> =
+    tellStatement <| nodeDoc nodeId  attrs
 
-let edge (id1:string) (id2:string) (attrs:Attribute list) : GraphvizOutput<unit> =
+let edge (nodeId1:string) (nodeId2:string) (attrs:Attribute list) : GraphvizOutput<unit> =
     graphvizOutput { 
         let! edgeOp = asksConfig (fun x -> x.EdgeOp)
-        match attrs with
-        | [] -> do! tellStatement <| sprintf "%s %s %s" id1 edgeOp id2
-        |_ -> do! tellStatement <| sprintf "%s %s %s %s" id1 edgeOp id2 (showAttributeList attrs)
+        do! tellStatement <| edgeDoc edgeOp nodeId1 nodeId2 attrs
+        return ()
         }
 
-let edges(id1:string) (ids:string list) (attrs:Attribute list) : GraphvizOutput<unit> =
+let edges(nodeId1:string) (nodeIds:string list) (attrs:Attribute list) : GraphvizOutput<unit> =
     graphvizOutput { 
-        let! edgeOp = fmapM (sprintf " %s ") <| asksConfig (fun x -> x.EdgeOp)
-        let path = String.concat edgeOp (id1::ids)
-        match attrs with
-        | [] -> do! tellStatement path
-        |_ -> do! tellStatement <| sprintf "%s %s" path (showAttributeList attrs)
+        let! edgeOp = asksConfig (fun x -> x.EdgeOp)
+        do! tellStatement <| edgesDoc edgeOp nodeId1 nodeIds attrs
+        return ()
         }
 
 

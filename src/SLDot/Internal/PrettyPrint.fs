@@ -252,6 +252,7 @@ module PrettyPrint =
 
     let cat (docs:Doc list) : Doc = group <| vcat docs
 
+    /// Concat with (^^)
     let punctuate (sep:Doc) (docs:Doc list) : Doc = 
         let rec work acc ds = 
             match ds with
@@ -261,7 +262,15 @@ module PrettyPrint =
         | [] -> empty
         | (x :: xs) -> work x xs
 
-
+    /// Concat with (^+^)
+    let punctuateSpaced (sep:Doc) (docs:Doc list) : Doc = 
+        let rec work acc ds = 
+            match ds with
+            | [] -> acc
+            | (x :: xs) -> work (acc ^+^ sep ^+^ x) xs
+        match docs with
+        | [] -> empty
+        | (x :: xs) -> work x xs
     let enclose (left:Doc) (right:Doc) (d:Doc) : Doc = left ^^ d ^^ right
 
 
