@@ -10,7 +10,7 @@ open SLDot.Internal
 open SLDot.Internal.DotPrint
 
 type Attribute = SLDot.Internal.DotPrint.Attribute
-type private Doc = PrettyPrint.Doc
+type private Doc = SLPretty.Doc
 
 // Graphviz Monad
 // Output is to a handle so this is not really a writer monad
@@ -22,8 +22,7 @@ type private Doc = PrettyPrint.Doc
 
 // type Indent = int
 type Config = 
-    { Indent : int
-      EdgeOp: string }
+    { EdgeOp: string }
 
 type GraphvizOutput<'a> = 
     GraphvizOutput of (Config -> WriterDoc -> (WriterDoc * 'a))
@@ -88,7 +87,7 @@ let forMz (xs:'a list) (fn:'a -> GraphvizOutput<'b>) : GraphvizOutput<unit> = ma
 let runGraphvizOutput (ma:GraphvizOutput<'a>) : (string * 'a) = 
     match ma with 
     | GraphvizOutput(f) -> 
-        let (acc,ans) =  f { Indent=0; EdgeOp="->" } wempty
+        let (acc,ans) =  f { EdgeOp="->" } wempty
         let text = acc.Render ()
         (text,ans)
 
@@ -123,7 +122,7 @@ let private tellDoc (doc:Doc) : GraphvizOutput<unit> =
 
 /// Same as tellLine but the string is suffixed with ";".
 let private tellStatement (line:Doc) : GraphvizOutput<unit> = 
-    tellDoc <| PrettyPrint.beside line (PrettyPrint.character ';')
+    tellDoc <| SLPretty.beside line (SLPretty.character ';')
 
 //let indent (body:GraphvizOutput<'a>) : GraphvizOutput<'a> = 
 //    GraphvizOutput <| fun config sw -> 
@@ -134,7 +133,7 @@ let private tellStatement (line:Doc) : GraphvizOutput<unit> =
 let nested (initial:string) (body:GraphvizOutput<'a>) : GraphvizOutput<'a> =
     GraphvizOutput <| fun config acc -> 
         let (body1, ans) = apply1 body config wempty
-        let acc2 = acc.PrefixNest (PrettyPrint.text initial) body1
+        let acc2 = acc.PrefixNest (SLPretty.text initial) body1
         (acc2, ans)
 
 

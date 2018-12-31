@@ -1,12 +1,30 @@
 ﻿// Copyright (c) Stephen Tetley 2018
 // License: BSD 3 Clause
 
-#load "../src/SLDot/Internal/PrettyPrint.fs"
+#load "../src/SLDot/Internal/SLPretty.fs"
 #load "../src/SLDot/Internal/DotPrint.fs"
 #load "../src/SLDot/DotOutput.fs"
+open SLDot.Internal.SLPretty
 open SLDot.DotOutput
 
+let testNesting01 () : unit = 
+    let a : Doc = text "aaa"
+    let b : Doc = text "bbb"
+    let c : Doc = text "ccc"
+    let d : Doc = text "ddd"
+    let newline = character '\n'
+    let doc1 : Doc  = a ^/^ (nest 2 (newline ^/^ b ^/^ newline ^/^ c)) ^/^ newline ^^ d
+    printfn "%s" <| render 80 doc1
 
+let testNesting02 () : unit = 
+    let a : Doc = text "aaa"
+    let b : Doc = text "bbb"
+    let c : Doc = text "ccc"
+    let d : Doc = text "ddd"
+    let doc1 : Doc  = group (        group (nest 4 a) 
+                                ^//^ group (nest 4 b) 
+                                ^//^ group (nest 4 c)) ^//^ d
+    printfn "%s" <| render 80 doc1
 
 let test01 () : unit = 
     let procM = 

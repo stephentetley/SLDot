@@ -8,7 +8,7 @@ namespace SLDot.Internal
 
 module DotPrint = 
 
-    open SLDot.Internal.PrettyPrint
+    open SLDot.Internal.SLPretty
 
     
     // Single case union
@@ -25,13 +25,15 @@ module DotPrint =
             writeDoc lineWidth fileName x.Body
 
         member x.Tell(doc:Doc) : WriterDoc = 
-            WriterDoc(x.Body ^@@^ doc)
+            WriterDoc(x.Body ^//^ doc)
 
         member x.Nest(doc:WriterDoc) : WriterDoc = 
-            WriterDoc(x.Body ^@@^ nest 4 (braces doc.Body))
+            WriterDoc(x.Body ^@@^ lbrace ^@@^ indent 4 doc.Body ^@@^ rbrace)
+
 
         member x.PrefixNest (prefix:Doc) (doc:WriterDoc) : WriterDoc = 
-            WriterDoc(x.Body ^@@^ prefix ^+^ nest 4 (braces doc.Body))
+            WriterDoc(x.Body ^@@^ prefix ^+^ lbrace ^@@^ indent 4 doc.Body ^@@^ rbrace)
+
 
     let wempty : WriterDoc =  WriterDoc(empty)
 
@@ -61,7 +63,7 @@ module DotPrint =
 
 
     let edgesDoc (edgeOp:string) (nodeId1:string) (nodes:string list) (attrs:Attribute list) : Doc =
-            let path = punctuateSpaced (text edgeOp) <| List.map text (nodeId1::nodes)
+            let path = punctuate (text <| sprintf " %s " edgeOp) <| List.map text (nodeId1::nodes)
             match attrs with
             | [] -> path
             | _ -> path ^+^ attributeList attrs
