@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="SLDot/Internal/SLPretty.fs" />
+    <Compile Include="SLDot/Internal/DotPrint.fs" />
+    <Compile Include="SLDot/DotOutput.fs" />
+  </ItemGroup>
+
+</Project>
