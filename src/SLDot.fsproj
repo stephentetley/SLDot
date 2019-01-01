@@ -5,9 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="SLDot/Internal/SLPretty.fs" />
     <Compile Include="SLDot/Internal/DotPrint.fs" />
     <Compile Include="SLDot/DotOutput.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SLPretty" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

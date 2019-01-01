@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Stephen Tetley 2018
 // License: BSD 3 Clause
 
-#load "../src/SLDot/Internal/SLPretty.fs"
+#I @"C:\Users\stephen\.nuget\packages\slpretty\1.0.0\lib\netstandard2.0"
+#r "SLPretty.dll"
+
 #load "../src/SLDot/Internal/DotPrint.fs"
 #load "../src/SLDot/DotOutput.fs"
-open SLDot.Internal.SLPretty
+open SLPretty
 open SLDot.DotOutput
 
 let testNesting01 () : unit = 

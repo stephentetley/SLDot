@@ -8,7 +8,9 @@ namespace SLDot.Internal
 
 module DotPrint = 
 
-    open SLDot.Internal.SLPretty
+    open SLPretty
+
+
 
     
     // Single case union

@@ -6,11 +6,11 @@ module SLDot.DotOutput
 
 open System.IO
 
-open SLDot.Internal
+open SLPretty
 open SLDot.Internal.DotPrint
 
+
 type Attribute = SLDot.Internal.DotPrint.Attribute
-type private Doc = SLPretty.Doc
 
 // Graphviz Monad
 // Output is to a handle so this is not really a writer monad
@@ -122,7 +122,7 @@ let private tellDoc (doc:Doc) : GraphvizOutput<unit> =
 
 /// Same as tellLine but the string is suffixed with ";".
 let private tellStatement (line:Doc) : GraphvizOutput<unit> = 
-    tellDoc <| SLPretty.beside line (SLPretty.character ';')
+    tellDoc <| beside line (character ';')
 
 //let indent (body:GraphvizOutput<'a>) : GraphvizOutput<'a> = 
 //    GraphvizOutput <| fun config sw -> 
@@ -133,7 +133,7 @@ let private tellStatement (line:Doc) : GraphvizOutput<unit> =
 let nested (initial:string) (body:GraphvizOutput<'a>) : GraphvizOutput<'a> =
     GraphvizOutput <| fun config acc -> 
         let (body1, ans) = apply1 body config wempty
-        let acc2 = acc.PrefixNest (SLPretty.text initial) body1
+        let acc2 = acc.PrefixNest (text initial) body1
         (acc2, ans)
 
 
