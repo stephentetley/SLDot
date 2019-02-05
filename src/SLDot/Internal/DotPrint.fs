@@ -1,4 +1,4 @@
-﻿// Copyright (c) Stephen Tetley 2018
+﻿// Copyright (c) Stephen Tetley 2018,2019
 // License: BSD 3 Clause
 
 
@@ -8,7 +8,7 @@ namespace SLDot.Internal
 
 module DotPrint = 
 
-    open SLPretty
+    open SLFormat.Pretty
 
 
 

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Stephen Tetley 2018
+﻿// Copyright (c) Stephen Tetley 2018,2019
 // License: BSD 3 Clause
 
 module SLDot.DotOutput
@@ -6,7 +6,7 @@ module SLDot.DotOutput
 
 open System.IO
 
-open SLPretty
+open SLFormat.Pretty
 open SLDot.Internal.DotPrint
 
 

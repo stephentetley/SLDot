@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SLPretty" Version="1.0.0" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190205" />
   </ItemGroup>
 
   <ItemGroup>
