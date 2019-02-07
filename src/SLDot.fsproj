@@ -7,10 +7,11 @@
   <ItemGroup>
     <Compile Include="SLDot/Internal/DotPrint.fs" />
     <Compile Include="SLDot/DotOutput.fs" />
+    <Compile Include="SLDot\Internal\Invoke.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190205" />
+    <PackageReference Include="SLFormat" Version="1.0.2-alpha-20190207" />
   </ItemGroup>
 
 </Project>

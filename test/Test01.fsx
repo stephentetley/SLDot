@@ -1,10 +1,11 @@
-﻿// Copyright (c) Stephen Tetley 2018
+﻿// Copyright (c) Stephen Tetley 2018,2019
 // License: BSD 3 Clause
 
-#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190205\lib\netstandard2.0"
+#I @"C:\Users\stephen\.nuget\packages\slformat\1.0.2-alpha-20190207\lib\netstandard2.0"
 #r "SLFormat.dll"
 
 #load @"../src/SLDot/Internal/DotPrint.fs"
+#load @"../src/SLDot/Internal/Invoke.fs"
 #load @"../src/SLDot/DotOutput.fs"
 open SLFormat.Pretty
 open SLDot.DotOutput

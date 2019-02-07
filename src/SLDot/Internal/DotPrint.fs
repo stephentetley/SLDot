@@ -77,5 +77,5 @@ module DotPrint =
 
     let lineCommentDoc (comment:string) : Doc =
         let lines = comment.Split [|'\n'|] |> Array.toList
-        vcat <| List.map (text << sprintf "%% %s") lines
+        vcat <| List.map (text << sprintf "// %s") lines
 

@@ -1,0 +1,8 @@
+// dot -Tjpeg sample1.dot -o sample1.jpg
+
+digraph G1 {
+    rankdir=LR;ranksep=1.50;node [fontname="Arial",fontsize=10];
+     {
+        node1;node2;node3;node1 -> node2;node3 -> node2 -> node1;
+    }
+}
