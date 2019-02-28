@@ -1,1 +1,3 @@
-The packages here you will have to install locally until they are ready to be pushed to nuget.org
+Package dependencies (e.g SLFormat) are here:
+
+https://github.com/stephentetley/package-local
