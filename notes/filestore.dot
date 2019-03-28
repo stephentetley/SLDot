@@ -1,0 +1,39 @@
+// dir.dot
+
+// Note - identifiers can't use dash (-).
+
+digraph sl_dot {
+    rankdir = LR;
+
+    { rank = same; "sl_dot" [shape=box]; }
+    
+    { rank = same; "notes" [shape=box]; "src" [shape=box]; "test" [shape=box]; "LICENSE" [shape=plaintext]; "README.md" [shape=plaintext]; "SLDot.sln" [shape=plaintext]; }
+
+
+    { rank = same; "output" [shape=box]; "filestore.dot" [shape=plaintext]; "Makefile" [shape=plaintext]; "sample1.dot" [shape=plaintext];
+		"bin" [shape=box]; "obj" [shape=box]; "SLDot" [shape=box]; "SLDot.fsproj" [shape=plaintext];
+		"bin.2" [shape=box; label="bin"]; "obj.2" [shape=box; label="obj"]; "SLDotTest.fsproj" [shape=plaintext]; "Test01.fsx" [shape=plaintext]; }
+
+    "sl_dot" -> "notes";
+    "sl_dot" -> "src";
+    "sl_dot" -> "test";
+    "sl_dot" -> "LICENSE";
+    "sl_dot" -> "README.md";
+    "sl_dot" -> "SLDot.sln";
+
+	"notes" -> "output";
+	"notes" -> "filestore.dot";
+	"notes" -> "Makefile";
+	"notes" -> "sample1.dot";
+	
+	"src" -> "bin";
+	"src" -> "obj";
+	"src" -> "SLDot";
+	"src" -> "SLDot.fsproj";
+	
+	"test" -> "bin.2";
+	"test" -> "obj.2";
+	"test" -> "SLDotTest.fsproj";
+	"test" -> "Test01.fsx";
+	
+}
